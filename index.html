@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Quản Lý Máy Thi Công</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+
+    <style>
+        /* Màu chủ đạo: Tím than */
+        :root { --main-color: #1a237e; --accent-color: #ffca28; }
+        body { background-color: #f3f4f6; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .btn-primary { background-color: var(--main-color); color: white; }
+        .btn-primary:active { opacity: 0.9; transform: scale(0.98); }
+        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
+        .hidden { display: none !important; }
+        .tab-active { color: var(--main-color); border-bottom: 3px solid var(--main-color); font-weight: bold; }
+        .form-input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; margin-bottom: 15px; font-size: 16px; }
+        .form-label { font-weight: 600; color: #333; margin-bottom: 5px; display: block; }
+    </style>
+</head>
+<body>
+
+    <div id="loading" class="loading-overlay">
+        <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div>
+        <p class="mt-4 text-blue-900 font-semibold">Đang tải dữ liệu máy...</p>
+    </div>
+
+    <div class="bg-[#1a237e] text-white p-4 shadow-lg sticky top-0 z-50">
+        <h1 class="text-xl font-bold text-center uppercase"><i class="fas fa-truck-monster mr-2"></i>Quản Lý Thiết Bị</h1>
+    </div>
+
+    <div class="flex bg-white shadow-sm sticky top-14 z-40">
+        <button onclick="switchTab('tab1')" id="btn-tab1" class="flex-1 py-3 text-center tab-active">
+            <i class="fas fa-edit mr-1"></i> Báo Cáo
+        </button>
+        <button onclick="switchTab('tab2')" id="btn-tab2" class="flex-1 py-3 text-center text-gray-500">
+            <i class="fas fa-chart-pie mr-1"></i> Tổng Quan
+        </button>
+    </div>
+
+    <div class="container mx-auto p-4 pb-24">
+        
+        <div id="tab1" class="block">
+            <div class="bg-white rounded-xl shadow p-5">
+                <h2 class="text-lg font-bold text-[#1a237e] mb-4 border-b pb-2">Nhật trình máy hoạt động</h2>
+                
+                <form id="reportForm" onsubmit="submitForm(event)">
+                    
+                    <label class="form-label">Chọn thiết bị:</label>
+                    <select id="maThietBi" class="form-input bg-gray-50" required>
+                        <option value="">-- Đang tải danh sách... --</option>
+                    </select>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="form-label">Giờ bắt đầu:</label>
+                            <input type="time" id="gioBatDau" class="form-input" required>
+                        </div>
+                        <div>
+                            <label class="form-label">Giờ kết thúc:</label>
+                            <input type="time" id="gioKetThuc" class="form-input" required>
+                        </div>
+                    </div>
+
+                    <label class="form-label">Nhiên liệu cấp (Lít):</label>
+                    <input type="number" id="nhienLieu" class="form-input" placeholder="Nhập 0 nếu không đổ dầu" step="0.1">
+
+                    <label class="form-label">Nội dung công việc:</label>
+                    <textarea id="noiDungCV" class="form-input" rows="3" placeholder="VD: San lấp mặt bằng Km2..." required></textarea>
+
+                    <label class="form-label">Người báo cáo:</label>
+                    <input type="text" id="nguoiBaoCao" class="form-input" placeholder="Tên lái máy" required>
+
+                    <button type="submit" class="w-full btn-primary py-4 rounded-xl font-bold text-lg shadow-lg mt-2">
+                        <i class="fas fa-paper-plane mr-2"></i> GỬI BÁO CÁO
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div id="tab2" class="hidden">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div class="bg-blue-100 p-4 rounded-xl text-center">
+                    <p class="text-sm text-gray-600">Tổng thiết bị</p>
+                    <p class="text-2xl font-bold text-blue-800" id="totalMachine">0</p>
+                </div>
+                <div class="bg-green-100 p-4 rounded-xl text-center">
+                    <p class="text-sm text-gray-600">Hoạt động tốt</p>
+                    <p class="text-2xl font-bold text-green-800" id="activeMachine">0</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow p-4 mb-4">
+                <h3 class="font-bold text-gray-700 mb-4 text-center">Trạng thái thiết bị</h3>
+                <div class="relative h-64">
+                    <canvas id="statusChart"></canvas>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl shadow overflow-hidden">
+                <div class="bg-gray-100 p-3 font-bold text-gray-700 border-b">Danh sách chi tiết</div>
+                <div id="machineListHTML" class="divide-y divide-gray-100">
+                    </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // CẤU HÌNH API
+        const API_URL = "https://script.google.com/macros/s/AKfycbzYyIkMT2LzPIzW90_WN-Wyg_LxLbYz-9K0nanufrH8VbvFhSHhk2KdgFkgVsHg9_YxoQ/exec";
+        
+        let machines = [];
+
+        // Khởi động
+        document.addEventListener("DOMContentLoaded", () => {
+            fetchMachines();
+            // Mặc định giờ hiện tại
+            const now = new Date();
+            const timeString = now.toTimeString().slice(0,5);
+            document.getElementById('gioBatDau').value = "07:00";
+            document.getElementById('gioKetThuc').value = "17:00";
+        });
+
+        // 1. Lấy danh sách máy từ Google Sheet
+        async function fetchMachines() {
+            try {
+                const response = await fetch(API_URL + "?action=getDanhSachMay");
+                machines = await response.json();
+                
+                renderDropdown();
+                renderDashboard();
+                document.getElementById('loading').classList.add('hidden');
+            } catch (error) {
+                Swal.fire('Lỗi', 'Không thể kết nối Server: ' + error, 'error');
+                document.getElementById('loading').classList.add('hidden');
+            }
+        }
+
+        // 2. Hiển thị Dropdown chọn máy
+        function renderDropdown() {
+            const select = document.getElementById('maThietBi');
+            select.innerHTML = '<option value="">-- Chọn máy --</option>';
+            machines.forEach(m => {
+                select.innerHTML += `<option value="${m.maMay}">${m.tenMay} (${m.bienSo})</option>`;
+            });
+        }
+
+        // 3. Xử lý Gửi báo cáo
+        function submitForm(e) {
+            e.preventDefault();
+            
+            // Tính tổng giờ
+            const t1 = document.getElementById('gioBatDau').value;
+            const t2 = document.getElementById('gioKetThuc').value;
+            // Tính sơ bộ (chưa xử lý qua đêm)
+            let h1 = parseInt(t1.split(':')[0]) + parseInt(t1.split(':')[1])/60;
+            let h2 = parseInt(t2.split(':')[0]) + parseInt(t2.split(':')[1])/60;
+            let total = (h2 - h1).toFixed(1);
+            if (total < 0) total = 0; // Đơn giản hóa
+
+            const data = {
+                ngayBaoCao: new Date().toLocaleDateString('vi-VN'),
+                maThietBi: document.getElementById('maThietBi').value,
+                gioBatDau: t1,
+                gioKetThuc: t2,
+                tongGio: total,
+                nhienLieu: document.getElementById('nhienLieu').value || 0,
+                noiDungCV: document.getElementById('noiDungCV').value,
+                nguoiBaoCao: document.getElementById('nguoiBaoCao').value
+            };
+
+            // Hiển thị Loading
+            Swal.fire({ title: 'Đang gửi...', didOpen: () => Swal.showLoading() });
+
+            // Gửi dữ liệu (Dùng text/plain để tránh lỗi CORS preflight của Google)
+            fetch(API_URL, {
+                method: 'POST',
+                mode: 'no-cors', // Quan trọng: Google Apps Script Webapp cần cái này nếu gọi từ client
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(data)
+            }).then(() => {
+                Swal.fire({
+                    title: 'Thành công!',
+                    text: 'Đã lưu nhật trình máy.',
+                    icon: 'success',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                document.getElementById('reportForm').reset();
+                document.getElementById('gioBatDau').value = "07:00";
+                document.getElementById('gioKetThuc').value = "17:00";
+            }).catch(err => {
+                Swal.fire('Lỗi', 'Có lỗi xảy ra: ' + err, 'error');
+            });
+        }
+
+        // 4. Vẽ Dashboard
+        function renderDashboard() {
+            // Thống kê
+            const total = machines.length;
+            const good = machines.filter(m => m.trangThai && m.trangThai.includes("tốt")).length;
+            const others = total - good;
+
+            document.getElementById('totalMachine').innerText = total;
+            document.getElementById('activeMachine').innerText = good;
+
+            // List
+            const listHTML = document.getElementById('machineListHTML');
+            listHTML.innerHTML = machines.map(m => `
+                <div class="p-3 flex justify-between items-center hover:bg-gray-50">
+                    <div>
+                        <div class="font-bold text-[#1a237e]">${m.maMay}</div>
+                        <div class="text-sm text-gray-500">${m.tenMay} - ${m.bienSo}</div>
+                    </div>
+                    <span class="text-xs px-2 py-1 rounded-full ${m.trangThai.includes('tốt') ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                        ${m.trangThai}
+                    </span>
+                </div>
+            `).join('');
+
+            // Chart
+            const ctx = document.getElementById('statusChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Hoạt động tốt', 'Bảo dưỡng/Khác'],
+                    datasets: [{
+                        data: [good, others],
+                        backgroundColor: ['#4caf50', '#f44336']
+                    }]
+                },
+                options: { maintainAspectRatio: false }
+            });
+        }
+
+        // Chuyển Tab
+        function switchTab(tabId) {
+            document.getElementById('tab1').classList.add('hidden');
+            document.getElementById('tab2').classList.add('hidden');
+            document.getElementById(tabId).classList.remove('hidden');
+
+            document.getElementById('btn-tab1').className = "flex-1 py-3 text-center text-gray-500";
+            document.getElementById('btn-tab2').className = "flex-1 py-3 text-center text-gray-500";
+            
+            document.getElementById('btn-' + tabId).className = "flex-1 py-3 text-center tab-active";
+        }
+    </script>
+</body>
+</html>
