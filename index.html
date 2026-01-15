@@ -3,56 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Quản Lý Máy V7.3 Final</title>
-    
+    <title>Quản Lý Máy V7.2 (Refresh)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
     
     <style>
-        :root { --main-color: #1a237e; } /* Màu Tím than chủ đạo */
+        :root { --main-color: #1a237e; }
         body { background-color: #f3f4f6; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
-        
         .form-section { background: white; padding: 12px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        
-        /* Label và Nút Refresh */
+        /* Style cho label và nút refresh */
         .form-label-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px; }
         .form-label { font-size: 13px; font-weight: 600; color: #555; }
-        .btn-refresh { color: var(--main-color); cursor: pointer; padding: 4px; font-size: 14px; transition: transform 0.5s; }
-        .btn-refresh:hover { transform: rotate(180deg); color: #303f9f; }
+        .btn-refresh { color: var(--main-color); cursor: pointer; padding: 4px; font-size: 14px; transition: transform 0.3s; }
+        .btn-refresh:hover { transform: rotate(30deg); color: #303f9f; }
         
         .form-input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; }
-        .form-input:focus { border-color: var(--main-color); outline: none; box-shadow: 0 0 0 2px rgba(26,35,126,0.1); }
+        .btn-submit { background-color: var(--main-color); color: white; width: 100%; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 16px; margin-top: 10px; }
         
-        .btn-submit { background-color: var(--main-color); color: white; width: 100%; padding: 14px; border-radius: 10px; font-weight: bold; font-size: 16px; margin-top: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
-        .btn-submit:active { transform: scale(0.98); }
-        
-        /* Bảng dữ liệu */
         .work-table { width: 100%; border-collapse: separate; border-spacing: 0; }
         .work-table th { background: var(--main-color); color: white; padding: 8px 4px; font-size: 12px; text-align: left; }
         .work-table th:first-child { border-top-left-radius: 8px; }
         .work-table th:last-child { border-top-right-radius: 8px; }
-        .work-table td { border-bottom: 1px solid #eee; padding: 6px 2px; vertical-align: middle; }
+        .work-table td { border-bottom: 1px solid #eee; padding: 6px 2px; }
+        .row-input { width: 100%; padding: 6px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 13px; }
+        .total-badge { background: #e0e7ff; color: #1a237e; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 13px; display: inline-block; }
         
-        .row-input { width: 100%; padding: 8px; border: 1px solid #e5e7eb; border-radius: 4px; font-size: 13px; background: #fff; }
-        .total-badge { background: #e0e7ff; color: #1a237e; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 13px; display: inline-block; border: 1px solid #c7d2fe; }
-        
-        /* Modal Camera QR */
         #qr-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
         #qr-reader { width: 320px; background: white; padding: 10px; border-radius: 8px; }
-        .btn-close-qr { margin-top: 20px; color: white; border: 1px solid white; padding: 8px 20px; border-radius: 20px; font-weight: 600; cursor: pointer; }
+        .btn-close-qr { margin-top: 20px; color: white; border: 1px solid white; padding: 8px 20px; border-radius: 20px; }
     </style>
 </head>
 <body>
 
     <div class="bg-[#1a237e] text-white p-4 sticky top-0 z-50 shadow-lg text-center flex justify-between items-center">
-        <div class="font-bold uppercase text-lg"><i class="fas fa-check-double mr-2"></i>Nhật Trình V7.3</div>
+        <div class="font-bold uppercase text-lg"><i class="fas fa-sync-alt mr-2"></i>Nhật Trình V7.2</div>
     </div>
 
     <div id="qr-modal">
         <div id="qr-reader"></div>
-        <button class="btn-close-qr" onclick="stopScan()"><i class="fas fa-times mr-2"></i>Đóng Camera</button>
+        <button class="btn-close-qr" onclick="stopScan()">Đóng Camera</button>
     </div>
 
     <div class="container mx-auto p-3 pb-24 max-w-lg">
@@ -75,7 +66,7 @@
                         <label class="form-label"><i class="fas fa-building mr-1"></i> Tên Công Trình</label>
                         <i class="fas fa-sync-alt btn-refresh" onclick="refreshAllData(this)" title="Cập nhật danh sách"></i>
                     </div>
-                    <select id="tenCongTrinh" class="form-input bg-yellow-50 font-semibold text-blue-900" required>
+                    <select id="tenCongTrinh" class="form-input bg-yellow-50 font-semibold" required>
                         <option value="">-- Đang tải danh sách... --</option>
                     </select>
                 </div>
@@ -83,30 +74,26 @@
                 <div class="mb-3">
                     <div class="form-label-group">
                         <label class="form-label">Chọn thiết bị</label>
-                        <i class="fas fa-sync-alt btn-refresh" onclick="refreshAllData(this)" title="Cập nhật máy"></i>
+                        <i class="fas fa-sync-alt btn-refresh" onclick="refreshAllData(this)" title="Cập nhật danh sách máy"></i>
                     </div>
                     <div class="flex gap-2">
                         <select id="maThietBi" class="form-input bg-blue-50 flex-1" required>
                             <option value="">-- Đang tải máy... --</option>
                         </select>
-                        <button type="button" onclick="startScan()" class="bg-[#1a237e] text-white px-4 rounded-lg shadow hover:bg-blue-800 transition">
-                            <i class="fas fa-qrcode text-xl"></i>
-                        </button>
+                        <button type="button" onclick="startScan()" class="bg-[#1a237e] text-white px-4 rounded-lg shadow"><i class="fas fa-qrcode"></i></button>
                     </div>
                 </div>
 
                 <div>
                     <label class="form-label">Người báo cáo</label>
-                    <input type="text" id="nguoiBao" class="form-input" placeholder="Nhập họ tên..." required>
+                    <input type="text" id="nguoiBao" class="form-input" placeholder="Họ tên..." required>
                 </div>
             </div>
 
             <div class="form-section p-0 overflow-hidden">
                 <div class="bg-gray-50 p-3 flex justify-between items-center border-b">
-                    <span class="font-bold text-[#1a237e] text-sm"><i class="fas fa-list-ul mr-1"></i> Chi tiết công việc</span>
-                    <button type="button" onclick="addWorkRow()" class="text-xs bg-white border border-blue-900 text-blue-900 px-3 py-1.5 rounded-full font-bold shadow-sm hover:bg-blue-50">
-                        <i class="fas fa-plus"></i> Thêm dòng
-                    </button>
+                    <span class="font-bold text-[#1a237e] text-sm">Chi tiết công việc</span>
+                    <button type="button" onclick="addWorkRow()" class="text-xs bg-white border border-blue-900 text-blue-900 px-3 py-1 rounded-full font-bold">+ Thêm dòng</button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="work-table">
@@ -119,22 +106,19 @@
                                 <th style="width: 5%"></th>
                             </tr>
                         </thead>
-                        <tbody id="workTableBody">
-                            </tbody>
+                        <tbody id="workTableBody"></tbody>
                     </table>
                 </div>
                 <div class="p-3 bg-gray-50 border-t text-right">
-                    <span class="text-xs text-gray-500 mr-2">Tổng cộng:</span>
+                    <span class="text-xs text-gray-500 mr-2">Tổng:</span>
                     <span id="displayTotal" class="total-badge">0</span>
                 </div>
             </div>
 
             <div class="form-section p-0 overflow-hidden">
                 <div class="bg-gray-50 p-3 flex justify-between items-center border-b">
-                    <span class="font-bold text-[#1a237e] text-sm"><i class="fas fa-gas-pump mr-1"></i> Nhiên liệu & Dầu mỡ</span>
-                    <button type="button" onclick="addFuelRow()" class="text-xs bg-white border border-blue-900 text-blue-900 px-3 py-1.5 rounded-full font-bold shadow-sm hover:bg-blue-50">
-                        <i class="fas fa-plus"></i> Thêm dòng
-                    </button>
+                    <span class="font-bold text-[#1a237e] text-sm">Nhiên liệu & Dầu mỡ</span>
+                    <button type="button" onclick="addFuelRow()" class="text-xs bg-white border border-blue-900 text-blue-900 px-3 py-1 rounded-full font-bold">+ Thêm dòng</button>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="work-table">
@@ -146,80 +130,71 @@
                                 <th style="width: 5%"></th>
                             </tr>
                         </thead>
-                        <tbody id="fuelTableBody">
-                            </tbody>
+                        <tbody id="fuelTableBody"></tbody>
                     </table>
                 </div>
             </div>
 
             <div class="form-section border-l-4 border-red-500 bg-red-50">
-                <label class="form-label text-red-700 mb-2"><i class="fas fa-tools mr-1"></i> Sửa chữa & Kiến nghị</label>
-                <textarea id="noiDungSua" class="form-input mb-2" rows="1" placeholder="Nội dung hỏng hóc..."></textarea>
-                <input type="number" id="chiPhiSua" class="form-input mb-2" placeholder="Chi phí dự kiến (VNĐ)">
-                <textarea id="kienNghi" class="form-input bg-yellow-50 border-yellow-200" rows="1" placeholder="Đề xuất vật tư/khác..."></textarea>
+                <label class="form-label text-red-700 mb-2">Sửa chữa & Kiến nghị</label>
+                <textarea id="noiDungSua" class="form-input mb-2" rows="1" placeholder="Hỏng hóc..."></textarea>
+                <input type="number" id="chiPhiSua" class="form-input mb-2" placeholder="Chi phí (VNĐ)">
+                <textarea id="kienNghi" class="form-input bg-yellow-50" rows="1" placeholder="Đề xuất..."></textarea>
             </div>
 
-            <button type="submit" class="btn-submit">
-                <i class="fas fa-paper-plane mr-2"></i> GỬI BÁO CÁO NGAY
-            </button>
-            <div class="text-center text-xs text-gray-400 mt-4 pb-4">System V7.3 Final by Gemini</div>
+            <button type="submit" class="btn-submit"><i class="fas fa-paper-plane mr-2"></i> GỬI BÁO CÁO</button>
         </form>
     </div>
 
-    <datalist id="unitOptions">
-        <option value="Lít"><option value="Kg"><option value="Hộp"><option value="Cái">
-    </datalist>
+    <datalist id="unitOptions"><option value="Lít"><option value="Kg"><option value="Hộp"><option value="Cái"></datalist>
 
     <script>
-        // ============================================================
-        // 👉 LINK API MỚI NHẤT CỦA ANH ĐÃ ĐƯỢC CẬP NHẬT Ở ĐÂY:
+        // 👉 ANH DÁN LINK API CỦA ANH VÀO ĐÂY:
         const API_URL = "https://script.google.com/macros/s/AKfycbyl5PcdJUh7GjoX0m-SzADXDyX3wOXVRcrz6gkA2H_uCZ9XjnOPQ1lSf1eXd3JUxhGo/exec";
-        // ============================================================
 
         let html5QrcodeScanner = null;
-        
-        // Cấu hình Toast thông báo
+        // Cấu hình Toast thông báo nhỏ góc màn hình
         const Toast = Swal.mixin({
             toast: true, position: 'top-end', showConfirmButton: false, timer: 2000, timerProgressBar: true,
             didOpen: (toast) => { toast.addEventListener('mouseenter', Swal.stopTimer); toast.addEventListener('mouseleave', Swal.resumeTimer); }
         });
 
-        // KHI TRANG WEB TẢI XONG
         document.addEventListener("DOMContentLoaded", () => {
             document.getElementById('ngayBaoCao').valueAsDate = new Date();
-            // Tải dữ liệu ban đầu
+            // Tải dữ liệu lần đầu
             Promise.all([fetchProjects(), fetchMachines()]);
-            addWorkRow(); // Thêm dòng việc mặc định
-            addFuelRow(); // Thêm dòng dầu mặc định
+            addWorkRow(); addFuelRow();
         });
 
-        // --- 1. CHỨC NĂNG LÀM MỚI (REFRESH) ---
+        // --- CHỨC NĂNG LÀM MỚI DỮ LIỆU (MỚI) ---
         async function refreshAllData(btnElement) {
+            // Hiệu ứng quay icon
             if(btnElement) btnElement.classList.add('fa-spin');
-            Toast.fire({ icon: 'info', title: 'Đang cập nhật dữ liệu...' });
+            
+            // Hiện thông báo đang tải
+            Toast.fire({ icon: 'info', title: 'Đang làm mới dữ liệu...' });
+
+            // Gọi đồng thời cả 2 hàm tải
             await Promise.all([fetchProjects(), fetchMachines()]);
+
+            // Tắt hiệu ứng quay và báo thành công
             if(btnElement) btnElement.classList.remove('fa-spin');
             Toast.fire({ icon: 'success', title: 'Đã cập nhật xong!' });
         }
 
-        // --- 2. CÁC HÀM TẢI DỮ LIỆU TỪ SHEET ---
+        // --- CÁC HÀM TẢI DỮ LIỆU (Đã tinh chỉnh để dùng chung) ---
         async function fetchProjects() {
             const sel = document.getElementById('tenCongTrinh');
             sel.innerHTML = '<option value="">Đang tải...</option>';
             try {
                 const res = await fetch(API_URL + "?action=getDanhSachCongTrinh");
                 const data = await res.json();
-                
                 if (!Array.isArray(data) || data.length === 0 || (data[0] && data[0].includes("Chưa tạo"))) {
-                    sel.innerHTML = '<option value="">-- Sheet công trình trống --</option>'; 
-                    return;
+                    sel.innerHTML = '<option value="">-- Sheet công trình trống --</option>'; return;
                 }
                 sel.innerHTML = '<option value="">-- Chọn công trình --</option>';
                 data.forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
-            } catch (e) { 
-                console.error(e);
-                sel.innerHTML = '<option>⚠️ Lỗi kết nối Server</option>'; 
-            }
+            } catch (e) { sel.innerHTML = '<option>⚠️ Lỗi kết nối</option>'; }
         }
 
         async function fetchMachines() {
@@ -230,17 +205,14 @@
                 const machines = await res.json();
                 sel.innerHTML = '<option value="">-- Chọn máy --</option>';
                 machines.forEach(m => sel.innerHTML += `<option value="${m.maMay}">${m.tenMay} (${m.bienSo})</option>`);
-            } catch (e) { 
-                sel.innerHTML = '<option>⚠️ Lỗi tải máy</option>'; 
-            }
+            } catch (e) { sel.innerHTML = '<option>⚠️ Lỗi tải máy</option>'; }
         }
 
-        // --- 3. QR CODE SCANNER ---
+        // --- QR CODE & CÁC HÀM KHÁC (GIỮ NGUYÊN) ---
         function startScan() {
             document.getElementById('qr-modal').style.display = 'flex';
             if (html5QrcodeScanner === null) html5QrcodeScanner = new Html5Qrcode("qr-reader");
             const config = { fps: 10, qrbox: { width: 250, height: 250 } };
-            
             html5QrcodeScanner.start({ facingMode: "environment" }, config, (decodedText) => {
                 stopScan();
                 const select = document.getElementById('maThietBi');
@@ -248,16 +220,84 @@
                 for (let i = 0; i < select.options.length; i++) {
                     if (select.options[i].value === decodedText) { select.selectedIndex = i; found = true; break; }
                 }
-                if(found) Toast.fire({ icon: 'success', title: 'Đã chọn: ' + decodedText });
-                else Swal.fire('Lỗi', 'Mã QR: ' + decodedText + ' không có trong danh sách', 'warning');
-            }, () => {}).catch(err => { 
-                Swal.fire('Lỗi Camera', 'Vui lòng cấp quyền Camera cho trình duyệt', 'error'); 
-                stopScan(); 
-            });
+                if(found) Toast.fire({ icon: 'success', title: 'Đã chọn máy: ' + decodedText });
+                else Swal.fire('Không tìm thấy', 'Mã QR: ' + decodedText + ' không có trong danh sách', 'warning');
+            }, () => {}).catch(err => { Swal.fire('Lỗi', 'Vui lòng cấp quyền Camera', 'error'); stopScan(); });
         }
         function stopScan() {
             if (html5QrcodeScanner) html5QrcodeScanner.stop().then(() => document.getElementById('qr-modal').style.display = 'none').catch(() => document.getElementById('qr-modal').style.display = 'none');
             else document.getElementById('qr-modal').style.display = 'none';
         }
 
-        // --- 4. XỬ LÝ BẢNG CÔNG VIỆC ---
+        function addWorkRow() {
+            const tbody = document.getElementById('workTableBody');
+            const rowId = 'w-' + Date.now();
+            const tr = document.createElement('tr');
+            tr.id = rowId;
+            tr.innerHTML = `
+                <td><select class="row-input w-shift font-bold text-blue-800"><option>Sáng</option><option>Chiều</option><option>Tăng ca</option></select></td>
+                <td><input type="text" class="row-input w-content" placeholder="Việc..."></td>
+                <td><input type="number" class="row-input w-vol text-center font-bold" placeholder="0" step="0.5" oninput="calcTotal()"></td>
+                <td><select class="row-input w-unit text-xs" onchange="calcTotal()"><option>Giờ</option><option>Chuyến</option><option>m3</option><option>Ca</option><option>km</option></select></td>
+                <td class="text-center"><i class="fas fa-times text-red-500 cursor-pointer p-1" onclick="removeRow('${rowId}', true)"></i></td>
+            `;
+            tbody.appendChild(tr);
+        }
+        function addFuelRow() {
+            const tbody = document.getElementById('fuelTableBody');
+            const rowId = 'f-' + Date.now();
+            const tr = document.createElement('tr');
+            tr.id = rowId;
+            tr.innerHTML = `
+                <td><select class="row-input f-type font-semibold"><option>Diesel</option><option>Dầu cầu</option><option>Dầu thủy lực</option><option>Dầu máy</option><option>Mỡ</option><option>Nước làm mát</option><option>Khác</option></select></td>
+                <td><input list="unitOptions" class="row-input f-unit text-center" value="Lít"></td>
+                <td><input type="number" class="row-input f-vol text-center font-bold" placeholder="0" step="0.1"></td>
+                <td class="text-center"><i class="fas fa-times text-red-500 cursor-pointer p-1" onclick="removeRow('${rowId}', false)"></i></td>
+            `;
+            tbody.appendChild(tr);
+        }
+        function removeRow(id, isWork) {
+            const row = document.getElementById(id);
+            if (row.parentNode.children.length > 1) { row.remove(); if(isWork) calcTotal(); }
+            else { row.querySelectorAll('input').forEach(i => i.value = ''); }
+        }
+        function calcTotal() {
+            let totals = {};
+            document.querySelectorAll('#workTableBody tr').forEach(row => {
+                const vol = parseFloat(row.querySelector('.w-vol').value) || 0;
+                const unit = row.querySelector('.w-unit').value;
+                if (vol > 0) totals[unit] = (totals[unit] || 0) + vol;
+            });
+            document.getElementById('displayTotal').innerText = Object.entries(totals).map(([u, v]) => `${v} ${u}`).join(" + ") || "0";
+        }
+
+        function submitForm(e) {
+            e.preventDefault();
+            Swal.fire({ title: 'Đang gửi...', didOpen: () => Swal.showLoading() });
+            let works = [], fuelData = { diesel: 0, dauCau: 0, thuyLuc: 0, dauMay: 0, khac: [] };
+            document.querySelectorAll('#workTableBody tr').forEach(row => {
+                const c = row.querySelector('.w-content').value;
+                const v = row.querySelector('.w-vol').value;
+                if(c || v) works.push({ caLam: row.querySelector('.w-shift').value, noiDung: c || "Không ghi", khoiLuong: v || 0, donVi: row.querySelector('.w-unit').value });
+            });
+            document.querySelectorAll('#fuelTableBody tr').forEach(row => {
+                const t = row.querySelector('.f-type').value;
+                const v = parseFloat(row.querySelector('.f-vol').value) || 0;
+                const u = row.querySelector('.f-unit').value;
+                if(v > 0) { if(t=='Diesel') fuelData.diesel += v; else if(t=='Dầu cầu') fuelData.dauCau += v; else if(t=='Dầu thủy lực') fuelData.thuyLuc += v; else if(t=='Dầu máy') fuelData.dauMay += v; else fuelData.khac.push(`${t}: ${v}${u}`); }
+            });
+            const data = {
+                ngayBaoCao: document.getElementById('ngayBaoCao').value, tenCongTrinh: document.getElementById('tenCongTrinh').value, sdt: document.getElementById('sdt').value, maThietBi: document.getElementById('maThietBi').value, nguoiBao: document.getElementById('nguoiBao').value,
+                danhSachViec: works, tongKhoiLuong: document.getElementById('displayTotal').innerText, diesel: fuelData.diesel, dauCau: fuelData.dauCau, dauThuyLuc: fuelData.thuyLuc, dauMay: fuelData.dauMay, dauKhac: fuelData.khac.join(", "),
+                noiDungSua: document.getElementById('noiDungSua').value, chiPhiSua: document.getElementById('chiPhiSua').value, kienNghi: document.getElementById('kienNghi').value
+            };
+            fetch(API_URL, { method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'text/plain' }, body: JSON.stringify(data) })
+            .then(() => {
+                Swal.fire({ icon: 'success', title: 'Thành công!', timer: 1500, showConfirmButton: false });
+                document.getElementById('reportForm').reset(); document.getElementById('workTableBody').innerHTML = ''; addWorkRow(); document.getElementById('fuelTableBody').innerHTML = ''; addFuelRow(); document.getElementById('displayTotal').innerText = "0"; document.getElementById('ngayBaoCao').valueAsDate = new Date();
+                refreshAllData(); // Tự động làm mới sau khi gửi
+            }).catch(e => Swal.fire('Lỗi', e.toString(), 'error'));
+        }
+    </script>
+</body>
+</html>
