@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hệ Thống Quản Lý V9.2</title>
+    <title>Hệ Thống Quản Lý V9.3 Turbo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -12,22 +12,18 @@
         :root { --main-color: #1a237e; }
         body { background-color: #f3f4f6; font-family: 'Segoe UI', sans-serif; -webkit-tap-highlight-color: transparent; }
         
-        /* MÀN HÌNH ĐĂNG NHẬP */
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #1a237e; z-index: 9999; display: flex; justify-content: center; align-items: center; flex-direction: column; }
         .login-box { background: white; padding: 25px; border-radius: 15px; width: 85%; max-width: 350px; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
         
-        /* MENU DƯỚI (Mặc định ẩn) */
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: none; justify-content: space-around; padding: 10px 0; z-index: 100; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .nav-item { text-align: center; color: #999; font-size: 12px; cursor: pointer; flex: 1; }
         .nav-item.active { color: var(--main-color); font-weight: bold; }
         .nav-item i { font-size: 20px; display: block; margin-bottom: 3px; }
 
-        /* CÁC MÀN HÌNH */
         .screen { display: none; padding-bottom: 20px; }
-        .has-nav .screen { padding-bottom: 80px; } /* Đẩy nội dung lên nếu có menu */
+        .has-nav .screen { padding-bottom: 80px; }
         .screen.active { display: block; }
         
-        /* FORM */
         .form-section { background: white; padding: 12px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .form-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
         .btn-submit { background-color: var(--main-color); color: white; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
@@ -36,13 +32,17 @@
         .btn-refresh { color: var(--main-color); cursor: pointer; padding: 4px; transition: 0.3s; }
         .btn-refresh:active { transform: rotate(180deg); }
 
-        /* THỐNG KÊ */
         .stat-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid var(--main-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .stat-value { font-size: 24px; font-weight: bold; color: var(--main-color); }
         .history-item { border-bottom: 1px solid #eee; padding: 10px 0; font-size: 13px; }
+        
+        /* Loading Overlay để chặn thao tác khi đang gửi */
+        #loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.7); z-index: 10000; justify-content: center; align-items: center; }
     </style>
 </head>
 <body>
+
+    <div id="loading-overlay"><div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-900"></div></div>
 
     <div id="login-screen">
         <div class="login-box">
@@ -51,12 +51,12 @@
             <input type="password" id="password" class="form-input mb-4" placeholder="Mật khẩu">
             <button onclick="doLogin()" class="btn-submit w-full">VÀO HỆ THỐNG</button>
         </div>
-        <p class="text-white text-xs mt-4 opacity-70">Hệ thống quản lý V9.2</p>
+        <p class="text-white text-xs mt-4 opacity-70">Turbo Speed V9.3</p>
     </div>
 
     <div class="bg-[#1a237e] text-white p-4 sticky top-0 z-50 shadow flex justify-between items-center">
         <div class="font-bold uppercase text-lg" id="header-title">NHẬT TRÌNH</div>
-        <div class="text-xs bg-blue-800 px-3 py-1 rounded cursor-pointer hover:bg-red-600 transition" onclick="location.reload()">
+        <div class="text-xs bg-blue-800 px-3 py-1 rounded cursor-pointer hover:bg-red-600 transition" onclick="doLogout()">
             <i class="fas fa-sign-out-alt mr-1"></i> Thoát
         </div>
     </div>
@@ -82,7 +82,7 @@
                 <div class="mb-3">
                     <div class="form-label-group">
                         <label class="form-label">Tên Công Trình</label>
-                        <i class="fas fa-sync-alt btn-refresh" onclick="refreshData(this)" title="Cập nhật"></i>
+                        <i class="fas fa-sync-alt btn-refresh" onclick="refreshData(this, true)" title="Cập nhật"></i>
                     </div>
                     <select id="tenCongTrinh" class="form-input font-semibold text-blue-800" required><option value="">-- Đang tải... --</option></select>
                 </div>
@@ -90,7 +90,7 @@
                 <div class="mb-1">
                     <div class="form-label-group">
                         <label class="form-label">Thiết bị / Xe</label>
-                        <i class="fas fa-sync-alt btn-refresh" onclick="refreshData(this)" title="Cập nhật"></i>
+                        <i class="fas fa-sync-alt btn-refresh" onclick="refreshData(this, true)" title="Cập nhật"></i>
                     </div>
                     <div class="flex gap-2">
                         <select id="maThietBi" class="form-input flex-1" required><option value="">-- Đang tải... --</option></select>
@@ -137,7 +137,6 @@
             <h3 class="font-bold text-gray-700 uppercase">TỔNG HỢP</h3>
             <button onclick="loadStats()" class="text-xs bg-white border border-blue-900 text-blue-900 px-2 py-1 rounded"><i class="fas fa-sync"></i> Cập nhật</button>
         </div>
-        
         <div class="grid grid-cols-2 gap-3 mb-4">
             <div class="stat-card">
                 <div class="text-sm text-gray-500">Tổng Giờ</div>
@@ -148,7 +147,6 @@
                 <div class="stat-value text-green-600" id="stat-shifts">0</div>
             </div>
         </div>
-
         <div class="bg-white rounded-xl shadow p-4 mb-4">
             <h4 class="font-bold text-red-700 border-b pb-2 mb-2">Sửa chữa gần đây</h4>
             <div id="list-repairs" class="text-sm text-gray-600">Đang tải...</div>
@@ -174,14 +172,26 @@
     </div>
 
     <script>
-        // 👉 LINK API CỦA ANH (GIỮ NGUYÊN)
+        // 👉 LINK API (Đã có Cache)
         const API_URL = "https://script.google.com/macros/s/AKfycbyl5PcdJUh7GjoX0m-SzADXDyX3wOXVRcrz6gkA2H_uCZ9XjnOPQ1lSf1eXd3JUxhGo/exec";
         
         let currentUser = null;
         let html5QrcodeScanner = null;
         const Toast = Swal.mixin({ toast: true, position: 'top-end', showConfirmButton: false, timer: 2000 });
 
-        // --- 1. XỬ LÝ ĐĂNG NHẬP & PHÂN QUYỀN ĐA NHIỆM ---
+        // TỰ ĐỘNG ĐĂNG NHẬP KHI MỞ APP
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedUser = localStorage.getItem("user_session");
+            if (savedUser) {
+                try {
+                    const userData = JSON.parse(savedUser);
+                    // Giả lập đăng nhập thành công từ bộ nhớ
+                    loginSuccess(userData);
+                } catch(e) { localStorage.removeItem("user_session"); }
+            }
+        });
+
+        // --- 1. XỬ LÝ ĐĂNG NHẬP ---
         function doLogin() {
             const u = document.getElementById('username').value;
             const p = document.getElementById('password').value;
@@ -194,102 +204,111 @@
             .then(data => {
                 Swal.close();
                 if(data.status == 'success') {
-                    currentUser = data;
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('user-fullname').innerText = data.hoTen;
-                    document.getElementById('sdt').value = u;
-
-                    const nav = document.getElementById('bottom-nav');
-                    const body = document.body;
-                    const headerTitle = document.getElementById('header-title');
-
-                    // LOGIC PHÂN QUYỀN MỚI
-                    if (data.quyen === 'Giam_Doc' || data.quyen === 'Quan_Ly') {
-                        // NHÓM QUẢN LÝ: Hiện Menu, vào thẳng Tổng quát
-                        nav.style.display = 'flex';
-                        body.classList.add('has-nav');
-                        switchScreen('stats');
-                        headerTitle.innerText = "QUẢN TRỊ VIÊN";
-                    } else {
-                        // NHÓM NHÂN VIÊN (Lái máy, Lái xe, Trạm trộn): Ẩn Menu
-                        nav.style.display = 'none';
-                        body.classList.remove('has-nav');
-                        switchScreen('input');
-                        
-                        // Đổi tên tiêu đề theo vai trò cho chuyên nghiệp
-                        if(data.quyen === 'Lai_Xe') headerTitle.innerText = "NHẬT TRÌNH LÁI XE";
-                        else if(data.quyen === 'Tram_Tron') headerTitle.innerText = "NHẬT TRÌNH TRẠM TRỘN";
-                        else headerTitle.innerText = "NHẬT TRÌNH MÁY";
-                    }
-
-                    // Tải dữ liệu
-                    refreshData();
-                    document.getElementById('ngayBaoCao').valueAsDate = new Date();
-                    addWorkRow(); addFuelRow();
+                    // Lưu phiên đăng nhập vào điện thoại
+                    localStorage.setItem("user_session", JSON.stringify(data));
+                    loginSuccess(data);
                 } else {
                     Swal.fire('Lỗi', data.message, 'error');
                 }
             }).catch(e => Swal.fire('Lỗi', 'Không kết nối được Server', 'error'));
         }
 
-        // --- CÁC HÀM XỬ LÝ KHÁC (GIỮ NGUYÊN) ---
-        async function refreshData(btn) {
+        function loginSuccess(data) {
+            currentUser = data;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('user-fullname').innerText = data.hoTen;
+            
+            // Xử lý quyền
+            const nav = document.getElementById('bottom-nav');
+            const body = document.body;
+            const headerTitle = document.getElementById('header-title');
+
+            if (data.quyen === 'Giam_Doc' || data.quyen === 'Quan_Ly') {
+                nav.style.display = 'flex';
+                body.classList.add('has-nav');
+                headerTitle.innerText = "QUẢN TRỊ VIÊN";
+                switchScreen('stats');
+            } else {
+                nav.style.display = 'none';
+                body.classList.remove('has-nav');
+                switchScreen('input');
+                if(data.quyen === 'Lai_Xe') headerTitle.innerText = "NHẬT TRÌNH LÁI XE";
+                else if(data.quyen === 'Tram_Tron') headerTitle.innerText = "NHẬT TRÌNH TRẠM TRỘN";
+                else headerTitle.innerText = "NHẬT TRÌNH MÁY";
+            }
+
+            // Tải dữ liệu từ LocalStorage trước cho nhanh
+            loadCachedData();
+            document.getElementById('ngayBaoCao').valueAsDate = new Date();
+            addWorkRow(); addFuelRow();
+        }
+
+        function doLogout() {
+            localStorage.removeItem("user_session");
+            location.reload();
+        }
+
+        // --- 2. HÀM TẢI DỮ LIỆU THÔNG MINH (CACHE FRONTEND) ---
+        function loadCachedData() {
+            // Lấy từ bộ nhớ điện thoại ra dùng ngay
+            const cachedProjects = localStorage.getItem("projects_list");
+            const cachedMachines = localStorage.getItem("machines_list");
+            
+            if(cachedProjects) fillSelect('tenCongTrinh', JSON.parse(cachedProjects));
+            if(cachedMachines) fillMachineSelect(JSON.parse(cachedMachines));
+
+            // Âm thầm cập nhật dữ liệu mới từ Server
+            refreshData(null, false); 
+        }
+
+        async function refreshData(btn, showToast = true) {
             if(btn) btn.classList.add('fa-spin');
-            await Promise.all([fetchProjects(), fetchMachines()]);
-            if(btn) btn.classList.remove('fa-spin');
-            Toast.fire({icon: 'success', title: 'Đã cập nhật dữ liệu'});
+            
+            try {
+                // Gọi song song
+                const [pRes, mRes] = await Promise.all([
+                    fetch(API_URL + "?action=getDanhSachCongTrinh"),
+                    fetch(API_URL + "?action=getDanhSachMay")
+                ]);
+                
+                const projects = await pRes.json();
+                const machines = await mRes.json();
+
+                // Lưu vào bộ nhớ điện thoại
+                if(Array.isArray(projects)) {
+                    localStorage.setItem("projects_list", JSON.stringify(projects));
+                    fillSelect('tenCongTrinh', projects);
+                }
+                if(Array.isArray(machines)) {
+                    localStorage.setItem("machines_list", JSON.stringify(machines));
+                    fillMachineSelect(machines);
+                }
+                
+                if(btn) btn.classList.remove('fa-spin');
+                if(showToast) Toast.fire({icon: 'success', title: 'Đã cập nhật dữ liệu'});
+
+            } catch(e) {
+                console.error(e);
+                if(btn) btn.classList.remove('fa-spin');
+            }
         }
 
-        async function fetchProjects() {
-             const sel = document.getElementById('tenCongTrinh');
-             try { 
-                 const res = await fetch(API_URL + "?action=getDanhSachCongTrinh"); 
-                 const data = await res.json();
-                 sel.innerHTML = '<option value="">-- Chọn công trình --</option>';
-                 if(Array.isArray(data)) data.forEach(p => sel.innerHTML += `<option value="${p}">${p}</option>`);
-             } catch(e){ sel.innerHTML = '<option>Lỗi tải</option>'; }
+        function fillSelect(id, data) {
+            const sel = document.getElementById(id);
+            sel.innerHTML = '<option value="">-- Chọn --</option>';
+            data.forEach(item => sel.innerHTML += `<option value="${item}">${item}</option>`);
         }
-        async function fetchMachines() {
-             const sel = document.getElementById('maThietBi');
-             try { 
-                 const res = await fetch(API_URL + "?action=getDanhSachMay"); 
-                 const data = await res.json();
-                 sel.innerHTML = '<option value="">-- Chọn thiết bị --</option>';
-                 data.forEach(m => sel.innerHTML += `<option value="${m.maMay}">${m.tenMay} (${m.bienSo})</option>`);
-             } catch(e){ sel.innerHTML = '<option>Lỗi tải</option>'; }
+        function fillMachineSelect(data) {
+            const sel = document.getElementById('maThietBi');
+            sel.innerHTML = '<option value="">-- Chọn --</option>';
+            data.forEach(m => sel.innerHTML += `<option value="${m.maMay}">${m.tenMay} (${m.bienSo})</option>`);
         }
 
-        function addWorkRow() {
-            document.getElementById('workTableBody').insertAdjacentHTML('beforeend', `
-            <div class="flex gap-1 mb-2 items-center work-row">
-                <select class="form-input w-3/12 w-shift font-bold p-1 text-xs"><option>Sáng</option><option>Chiều</option><option>Tăng ca</option></select>
-                <input class="form-input w-4/12 w-content p-1" placeholder="Việc...">
-                <input type="number" class="form-input w-2/12 w-vol p-1 text-center" placeholder="SL">
-                <select class="form-input w-2/12 w-unit p-1 text-xs"><option>Giờ</option><option>Ca</option><option>m3</option><option>Chuyến</option><option>Km</option></select>
-                <div class="w-1/12 text-center"><i class="fas fa-times text-red-500 cursor-pointer" onclick="this.parentElement.parentElement.remove()"></i></div>
-            </div>`);
-        }
-
-        function addFuelRow() {
-            document.getElementById('fuelTableBody').insertAdjacentHTML('beforeend', `
-            <div class="flex gap-1 mb-2 items-center fuel-row">
-                <select class="form-input w-5/12 f-type font-semibold p-1">
-                    <option>Diesel</option><option>Dầu cầu</option><option>Dầu máy</option>
-                    <option>Thủy lực</option><option>Mỡ</option><option>Nước làm mát</option><option>Khác</option>
-                </select>
-                <input type="number" class="form-input w-3/12 f-vol p-1 text-center" placeholder="0">
-                <select class="form-input w-3/12 f-unit p-1 text-xs">
-                    <option value="Lít">Lít</option><option value="Kg">Kg</option><option value="Can">Can</option><option value="Khác">Khác</option>
-                </select>
-                <div class="w-1/12 text-center">
-                    <i class="fas fa-times text-red-500 cursor-pointer" onclick="this.parentElement.parentElement.remove()"></i>
-                </div>
-            </div>`);
-        }
-
+        // --- 3. GỬI BÁO CÁO ---
         function submitForm(e) {
             e.preventDefault();
-            Swal.fire({ title: 'Đang gửi...', didOpen: () => Swal.showLoading() });
+            // Show loading
+            document.getElementById('loading-overlay').style.display = 'flex';
             
             let works = [];
             document.querySelectorAll('.work-row').forEach(row => {
@@ -312,7 +331,7 @@
             const data = {
                 ngayBaoCao: document.getElementById('ngayBaoCao').value,
                 tenCongTrinh: document.getElementById('tenCongTrinh').value,
-                sdt: document.getElementById('sdt').value,
+                sdt: document.getElementById('sdt').value || currentUser.u, // Lấy SĐT từ input hoặc tài khoản
                 maThietBi: document.getElementById('maThietBi').value,
                 nguoiBao: currentUser.hoTen,
                 danhSachViec: works, tongKhoiLuong: "Xem chi tiết",
@@ -324,22 +343,48 @@
 
             fetch(API_URL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(data)})
             .then(() => {
+                document.getElementById('loading-overlay').style.display = 'none';
                 Swal.fire({icon:'success', title:'Thành công', timer:1500, showConfirmButton:false});
                 document.getElementById('reportForm').reset();
                 document.getElementById('workTableBody').innerHTML=''; addWorkRow();
                 document.getElementById('fuelTableBody').innerHTML=''; addFuelRow();
                 document.getElementById('ngayBaoCao').valueAsDate=new Date();
+            }).catch(() => {
+                document.getElementById('loading-overlay').style.display = 'none';
+                Swal.fire('Lỗi', 'Gửi thất bại', 'error');
             });
         }
 
+        // --- CÁC HÀM UI KHÁC ---
+        function addWorkRow() {
+            document.getElementById('workTableBody').insertAdjacentHTML('beforeend', `
+            <div class="flex gap-1 mb-2 items-center work-row">
+                <select class="form-input w-3/12 w-shift font-bold p-1 text-xs"><option>Sáng</option><option>Chiều</option><option>Tăng ca</option></select>
+                <input class="form-input w-4/12 w-content p-1" placeholder="Việc...">
+                <input type="number" class="form-input w-2/12 w-vol p-1 text-center" placeholder="SL">
+                <select class="form-input w-2/12 w-unit p-1 text-xs"><option>Giờ</option><option>Ca</option><option>m3</option><option>Chuyến</option><option>Km</option></select>
+                <div class="w-1/12 text-center"><i class="fas fa-times text-red-500 cursor-pointer" onclick="this.parentElement.parentElement.remove()"></i></div>
+            </div>`);
+        }
+        function addFuelRow() {
+            document.getElementById('fuelTableBody').insertAdjacentHTML('beforeend', `
+            <div class="flex gap-1 mb-2 items-center fuel-row">
+                <select class="form-input w-5/12 f-type font-semibold p-1">
+                    <option>Diesel</option><option>Dầu cầu</option><option>Dầu máy</option><option>Thủy lực</option><option>Mỡ</option><option>Nước làm mát</option><option>Khác</option>
+                </select>
+                <input type="number" class="form-input w-3/12 f-vol p-1 text-center" placeholder="0">
+                <select class="form-input w-3/12 f-unit p-1 text-xs"><option value="Lít">Lít</option><option value="Kg">Kg</option><option value="Can">Can</option><option value="Khác">Khác</option></select>
+                <div class="w-1/12 text-center"><i class="fas fa-times text-red-500 cursor-pointer" onclick="this.parentElement.parentElement.remove()"></i></div>
+            </div>`);
+        }
         function switchScreen(name) {
             document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
             document.getElementById('screen-' + name).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById('nav-item-' + name).classList.add('active');
+            const nav = document.getElementById('nav-item-' + name);
+            if(nav) nav.classList.add('active');
             if(name === 'stats') loadStats();
         }
-
         function loadStats() {
             if(!currentUser) return;
             document.getElementById('list-repairs').innerText = 'Đang tải...';
@@ -348,14 +393,14 @@
             .then(data => {
                 document.getElementById('stat-hours').innerText = data.tongGio;
                 document.getElementById('stat-shifts').innerText = data.tongCa;
-                renderList('list-repairs', data.suaChua, "Chưa có dữ liệu.");
-                renderList('list-petitions', data.kienNghi, "Chưa có dữ liệu.");
+                const d=document.getElementById('list-repairs');
+                if(data.suaChua.length==0)d.innerText="Chưa có dữ liệu";
+                else d.innerHTML=data.suaChua.map(i=>`<div class="history-item"><div class="text-xs text-gray-500">${i.ngay.substring(0,10)}</div><div>${i.noiDung}</div></div>`).join('');
+                
+                const p=document.getElementById('list-petitions');
+                if(data.kienNghi.length==0)p.innerText="Chưa có dữ liệu";
+                else p.innerHTML=data.kienNghi.map(i=>`<div class="history-item"><div class="text-xs text-gray-500">${i.ngay.substring(0,10)}</div><div>${i.noiDung}</div></div>`).join('');
             });
-        }
-        function renderList(id, list, msg) {
-            const d = document.getElementById(id);
-            if(list.length==0) d.innerText=msg;
-            else d.innerHTML=list.map(i=>`<div class="history-item"><div class="text-xs text-gray-500">${i.ngay.substring(0,10)}</div><div>${i.noiDung}</div></div>`).join('');
         }
         function startScan() { document.getElementById('qr-modal').style.display='flex'; if(html5QrcodeScanner===null) html5QrcodeScanner=new Html5Qrcode("qr-reader"); html5QrcodeScanner.start({facingMode:"environment"},{fps:10,qrbox:{width:250,height:250}},(t)=>{stopScan(); let s=document.getElementById('maThietBi'); for(let i=0;i<s.options.length;i++) if(s.options[i].value===t) {s.selectedIndex=i; Swal.fire('Đã chọn',t,'success'); return;} Swal.fire('Lỗi','Không tìm thấy máy','warning'); }).catch(()=>{Swal.fire('Lỗi','Cần quyền camera','error');stopScan();}); }
         function stopScan() { if(html5QrcodeScanner) html5QrcodeScanner.stop().then(()=>document.getElementById('qr-modal').style.display='none').catch(()=>document.getElementById('qr-modal').style.display='none'); else document.getElementById('qr-modal').style.display='none'; }
