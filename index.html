@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Hệ Thống Quản Lý V9.4</title>
+    <title>Hệ Thống Quản Lý V9.5</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
@@ -25,16 +25,15 @@
         .screen.active { display: block; }
         
         .form-section { background: white; padding: 12px; border-radius: 12px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
-        .form-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; }
+        .form-input { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 0; }
         .btn-submit { background-color: var(--main-color); color: white; width: 100%; padding: 12px; border-radius: 8px; font-weight: bold; margin-top: 5px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .form-label-group { display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px; }
-        .form-label { font-weight: 600; color: #333; font-size: 13px; }
         .btn-refresh { color: var(--main-color); cursor: pointer; padding: 4px; transition: 0.3s; }
         .btn-refresh:active { transform: rotate(180deg); }
-
+        
         .stat-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; border-left: 5px solid var(--main-color); box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         .stat-value { font-size: 24px; font-weight: bold; color: var(--main-color); }
         .history-item { border-bottom: 1px solid #eee; padding: 10px 0; font-size: 13px; }
+        
         #loading-overlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(255,255,255,0.7); z-index: 10000; justify-content: center; align-items: center; }
     </style>
 </head>
@@ -48,7 +47,7 @@
             <input type="password" id="password" class="form-input mb-4" placeholder="Mật khẩu">
             <button onclick="doLogin()" class="btn-submit w-full">VÀO HỆ THỐNG</button>
         </div>
-        <p class="text-white text-xs mt-4 opacity-70">Phiên bản ổn định V9.4</p>
+        <p class="text-white text-xs mt-4 opacity-70">Super Speed V9.5</p>
     </div>
 
     <div class="bg-[#1a237e] text-white p-4 sticky top-0 z-50 shadow flex justify-between items-center">
@@ -65,26 +64,26 @@
                     <i class="fas fa-id-badge mr-1"></i> <span id="user-fullname">...</span>
                 </div>
                 <div class="grid grid-cols-2 gap-3 mb-3">
-                    <div><label class="form-label block mb-1">Ngày báo cáo</label><input type="date" id="ngayBaoCao" class="form-input" required></div>
-                    <div><label class="form-label block mb-1">SĐT liên hệ</label><input type="tel" id="sdt" class="form-input" placeholder="09xxxx..." required></div>
+                    <div><label class="block text-xs font-bold mb-1">Ngày báo cáo</label><input type="date" id="ngayBaoCao" class="form-input" required></div>
+                    <div><label class="block text-xs font-bold mb-1">SĐT liên hệ</label><input type="tel" id="sdt" class="form-input" placeholder="09xxxx..." required></div>
                 </div>
                 <div class="mb-3">
-                    <div class="form-label-group"><label class="form-label">Tên Công Trình</label><i class="fas fa-sync-alt btn-refresh" onclick="refreshData(this, true)"></i></div>
-                    <select id="tenCongTrinh" class="form-input font-semibold text-blue-800" required><option value="">-- Đang tải... --</option></select>
+                    <div class="flex justify-between mb-1"><label class="text-xs font-bold">Tên Công Trình</label><i class="fas fa-sync-alt btn-refresh" onclick="refreshData(this)"></i></div>
+                    <select id="tenCongTrinh" class="form-input font-semibold text-blue-800" required><option value="">-- Chọn --</option></select>
                 </div>
                 <div class="mb-1">
-                    <div class="form-label-group"><label class="form-label">Thiết bị / Xe</label><i class="fas fa-sync-alt btn-refresh" onclick="refreshData(this, true)"></i></div>
-                    <div class="flex gap-2"><select id="maThietBi" class="form-input flex-1" required><option value="">-- Đang tải... --</option></select><button type="button" onclick="startScan()" class="bg-[#1a237e] text-white px-3 rounded-lg"><i class="fas fa-qrcode"></i></button></div>
+                    <div class="flex justify-between mb-1"><label class="text-xs font-bold">Thiết bị / Xe</label><i class="fas fa-sync-alt btn-refresh" onclick="refreshData(this)"></i></div>
+                    <div class="flex gap-2"><select id="maThietBi" class="form-input flex-1" required><option value="">-- Chọn --</option></select><button type="button" onclick="startScan()" class="bg-[#1a237e] text-white px-3 rounded-lg"><i class="fas fa-qrcode"></i></button></div>
                 </div>
             </div>
 
             <div class="form-section">
-                <div class="form-label-group border-b pb-1 mb-2"><span class="font-bold text-blue-900 text-sm">Nội dung công việc</span><button type="button" onclick="addWorkRow()" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-bold">+ Thêm</button></div>
+                <div class="flex justify-between border-b pb-1 mb-2"><span class="font-bold text-blue-900 text-sm">Công việc</span><button type="button" onclick="addWorkRow()" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-bold">+ Thêm</button></div>
                 <div id="workTableBody"></div>
             </div>
             
             <div class="form-section">
-                <div class="form-label-group border-b pb-1 mb-2"><span class="font-bold text-blue-900 text-sm">Nhiên liệu & Vật tư</span><button type="button" onclick="addFuelRow()" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-bold">+ Thêm</button></div>
+                <div class="flex justify-between border-b pb-1 mb-2"><span class="font-bold text-blue-900 text-sm">Nhiên liệu</span><button type="button" onclick="addFuelRow()" class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-bold">+ Thêm</button></div>
                 <div class="flex gap-1 mb-1 text-xs text-gray-500 font-semibold px-1"><div class="w-5/12">Loại</div><div class="w-3/12 text-center">SL</div><div class="w-3/12">Đơn vị</div><div class="w-1/12"></div></div>
                 <div id="fuelTableBody"></div>
             </div>
@@ -117,7 +116,7 @@
     <div id="qr-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);z-index:9999;justify-content:center;align-items:center;flex-direction:column;"><div id="qr-reader" style="width:300px;background:white;padding:10px;border-radius:8px;"></div><button onclick="stopScan()" style="margin-top:20px;color:white;border:1px solid white;padding:8px 20px;border-radius:20px;">Đóng Camera</button></div>
 
     <script>
-        // 👉 LINK API (Cập nhật nếu cần)
+        // 👉 LINK API MỚI (Lấy link mới nếu anh tạo lại)
         const API_URL = "https://script.google.com/macros/s/AKfycbyl5PcdJUh7GjoX0m-SzADXDyX3wOXVRcrz6gkA2H_uCZ9XjnOPQ1lSf1eXd3JUxhGo/exec";
         
         let currentUser = null;
@@ -134,7 +133,7 @@
             const p = document.getElementById('password').value.trim();
             if(!u || !p) return Swal.fire('Lỗi', 'Nhập thiếu thông tin', 'warning');
 
-            Swal.fire({title: 'Đang đăng nhập...', didOpen: () => Swal.showLoading()});
+            Swal.fire({title: 'Đang kiểm tra...', didOpen: () => Swal.showLoading()});
 
             fetch(API_URL + `?action=login&user=${encodeURIComponent(u)}&pass=${encodeURIComponent(p)}`)
             .then(r => r.json())
@@ -144,9 +143,9 @@
                     localStorage.setItem("user_session", JSON.stringify(data));
                     loginSuccess(data);
                 } else {
-                    Swal.fire('Đăng nhập thất bại', data.message || 'Sai tài khoản/mật khẩu', 'error');
+                    Swal.fire('Thất bại', data.message, 'error');
                 }
-            }).catch(e => Swal.fire('Lỗi mạng', 'Không kết nối được server. Vui lòng kiểm tra mạng!', 'error'));
+            }).catch(e => Swal.fire('Lỗi', 'Không kết nối được Server', 'error'));
         }
 
         function loginSuccess(data) {
@@ -178,7 +177,7 @@
             const cachedMachines = localStorage.getItem("machines_list");
             if(cachedProjects) fillSelect('tenCongTrinh', JSON.parse(cachedProjects));
             if(cachedMachines) fillMachineSelect(JSON.parse(cachedMachines));
-            refreshData(null, false); 
+            refreshData(null, false);
         }
 
         async function refreshData(btn, showToast = true) {
@@ -190,7 +189,7 @@
                 if(Array.isArray(projects)) { localStorage.setItem("projects_list", JSON.stringify(projects)); fillSelect('tenCongTrinh', projects); }
                 if(Array.isArray(machines)) { localStorage.setItem("machines_list", JSON.stringify(machines)); fillMachineSelect(machines); }
                 if(btn) btn.classList.remove('fa-spin');
-                if(showToast) Toast.fire({icon: 'success', title: 'Đã cập nhật dữ liệu'});
+                if(showToast) Toast.fire({icon: 'success', title: 'Đã cập nhật'});
             } catch(e) { if(btn) btn.classList.remove('fa-spin'); }
         }
 
@@ -206,13 +205,11 @@
         function submitForm(e) {
             e.preventDefault();
             document.getElementById('loading-overlay').style.display = 'flex';
-            
             let works = [];
             document.querySelectorAll('.work-row').forEach(row => {
                 let c = row.querySelector('.w-content').value, v = row.querySelector('.w-vol').value;
                 if(c || v) works.push({caLam:row.querySelector('.w-shift').value, noiDung:c||"KĐ", khoiLuong:v||0, donVi:row.querySelector('.w-unit').value});
             });
-
             let fuel = {diesel:0, dauCau:0, dauMay:0, thuyLuc:0, khac:[]};
             document.querySelectorAll('.fuel-row').forEach(row => {
                 let t = row.querySelector('.f-type').value, v = parseFloat(row.querySelector('.f-vol').value)||0, u = row.querySelector('.f-unit').value;
@@ -220,7 +217,6 @@
                     if(t=='Diesel') fuel.diesel+=v; else if(t=='Dầu cầu') fuel.dauCau+=v; else if(t=='Dầu máy') fuel.dauMay+=v; else if(t=='Thủy lực') fuel.thuyLuc+=v; else fuel.khac.push(`${t}: ${v} ${u}`);
                 }
             });
-
             const data = {
                 ngayBaoCao: document.getElementById('ngayBaoCao').value,
                 tenCongTrinh: document.getElementById('tenCongTrinh').value,
@@ -231,7 +227,6 @@
                 diesel: fuel.diesel, dauCau: fuel.dauCau, dauThuyLuc: fuel.thuyLuc, dauMay: fuel.dauMay, dauKhac: fuel.khac.join(', '),
                 noiDungSua: document.getElementById('noiDungSua').value, chiPhiSua: document.getElementById('chiPhiSua').value, kienNghi: document.getElementById('kienNghi').value
             };
-
             fetch(API_URL, {method:'POST', mode:'no-cors', headers:{'Content-Type':'text/plain'}, body:JSON.stringify(data)})
             .then(() => {
                 document.getElementById('loading-overlay').style.display = 'none';
@@ -244,7 +239,6 @@
                 document.getElementById('loading-overlay').style.display = 'none'; Swal.fire('Lỗi', 'Gửi thất bại', 'error');
             });
         }
-
         function addWorkRow() { document.getElementById('workTableBody').insertAdjacentHTML('beforeend', `<div class="flex gap-1 mb-2 items-center work-row"><select class="form-input w-3/12 w-shift font-bold p-1 text-xs"><option>Sáng</option><option>Chiều</option><option>Tăng ca</option></select><input class="form-input w-4/12 w-content p-1" placeholder="Việc..."><input type="number" class="form-input w-2/12 w-vol p-1 text-center" placeholder="SL"><select class="form-input w-2/12 w-unit p-1 text-xs"><option>Giờ</option><option>Ca</option><option>m3</option><option>Chuyến</option><option>Km</option></select><div class="w-1/12 text-center"><i class="fas fa-times text-red-500 cursor-pointer" onclick="this.parentElement.parentElement.remove()"></i></div></div>`); }
         function addFuelRow() { document.getElementById('fuelTableBody').insertAdjacentHTML('beforeend', `<div class="flex gap-1 mb-2 items-center fuel-row"><select class="form-input w-5/12 f-type font-semibold p-1"><option>Diesel</option><option>Dầu cầu</option><option>Dầu máy</option><option>Thủy lực</option><option>Mỡ</option><option>Nước làm mát</option><option>Khác</option></select><input type="number" class="form-input w-3/12 f-vol p-1 text-center" placeholder="0"><select class="form-input w-3/12 f-unit p-1 text-xs"><option value="Lít">Lít</option><option value="Kg">Kg</option><option value="Can">Can</option><option value="Khác">Khác</option></select><div class="w-1/12 text-center"><i class="fas fa-times text-red-500 cursor-pointer" onclick="this.parentElement.parentElement.remove()"></i></div></div>`); }
         function switchScreen(name) { document.querySelectorAll('.screen').forEach(el => el.classList.remove('active')); document.getElementById('screen-' + name).classList.add('active'); document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); const nav = document.getElementById('nav-item-' + name); if(nav) nav.classList.add('active'); if(name === 'stats') loadStats(); }
